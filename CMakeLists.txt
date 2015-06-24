@@ -155,6 +155,11 @@ target_link_libraries(face_finder
 #   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 # )
 
+install(
+   FILES lbpcascade_frontalface.xml
+   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)
+
 #############
 ## Testing ##
 #############
