@@ -6,6 +6,7 @@
 #define FACE_RECOGNITION_FACEFINDER_H
 
 #include <iostream>
+#include <math.h>
 
 #include <ros/ros.h>
 #include <geometry_msgs/Vector3.h>
@@ -35,6 +36,7 @@ class FaceFinder {
 
     std::string face_cascade_name;
     std::string eyes_cascade_name;
+    std::string image_source_name;
     //cv::CascadeClassifier face_cascade;
     //cv::CascadeClassifier eyes_cascade;
 

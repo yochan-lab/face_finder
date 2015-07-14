@@ -8,7 +8,9 @@ FaceFinder::FaceFinder():it(nh) {
     if(!ros::param::get("face_finder/face_cascade", face_cascade_name))
         ROS_ERROR("No haarcascade for face specified");
 
-    image_source = it.subscribe("/camera/rgb/image_mono", 1, &FaceFinder::findFaces, this);
+    if (!ros::param::get("face_finder/image_source", image_source_name))
+	ROS_ERROR("No image_source specified");
+    image_source = it.subscribe(image_source_name, 1, &FaceFinder::findFaces, this);
     image_output = it.advertise("/face_finder/image_output", 1);
     closest_face = nh.advertise<geometry_msgs::Vector3>("face_finder/closest_face", 1);
 
@@ -57,6 +59,10 @@ void FaceFinder::findFaces(const sensor_msgs::ImageConstPtr &msg) {
     //output image
     cv::Rect *face = (faceOutput.ptr<Rect>()); //use if you need one face
     cv_ptr->image = cv_ptr->image(*face).clone();
+    cv_ptr->encoding = sensor_msgs::image_encodings::MONO8;
+    //sensor_msgs::Image* outmsg = cv_ptr->toImageMsg();
+    //outmsg->encoding = sensor_msgs::image_encodings::MONO8;
+    //image_output.publish(outmsg);
     image_output.publish(cv_ptr->toImageMsg());
 
     //cout << "width:" << face->width << " height:" << face->height << endl;
@@ -85,8 +91,14 @@ void FaceFinder::findFaces(const sensor_msgs::ImageConstPtr &msg) {
     //calculate vector
     int width = cv_ptr->image.cols; int height = cv_ptr->image.rows;
     geometry_msgs::Vector3 vector;
-    vector.y = face->x + (face->width)/2 - 320;
-    vector.z = -face->y - (face->height)/2 + 240;
+    double y = face->x + (face->width)/2 - 160;
+    double z = -face->y - (face->height)/2 + 120;
+    double denom = sqrt(pow(y, 2) + pow(z, 2)); 
+    y = -y/denom; //unit vector
+    z = -z/denom;
+    vector.x = 0;
+    vector.y = (abs(y) > 0.8) ? .5*(y - .6 * (y>0?1:-1)) : 0;
+    vector.z = (abs(z) > 0.8) ? .5*(z - .6 * (z>0?1:-1)) : 0;
     closest_face.publish(vector);
 }
 
