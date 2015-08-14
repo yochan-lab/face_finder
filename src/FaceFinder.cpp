@@ -12,7 +12,7 @@ FaceFinder::FaceFinder():it(nh) {
 	ROS_ERROR("No image_source specified");
     image_source = it.subscribe(image_source_name, 1, &FaceFinder::findFaces, this);
     image_output = it.advertise("/face_finder/image_output", 1);
-    closest_face = nh.advertise<geometry_msgs::Vector3>("face_finder/closest_face", 1);
+    closest_face = nh.advertise<geometry_msgs::Vector3>("face_finder/closest_face", 1, false);
 
 
     if (!face_cascade.load(face_cascade_name))
@@ -44,7 +44,7 @@ void FaceFinder::findFaces(const sensor_msgs::ImageConstPtr &msg) {
     int numberOfFaces = face_cascade.detectMultiScale(gpuInput,
                                                       gpuOutput,
                                                       1.2,
-                                                      4,
+                                                      6,
                                                       cv::Size(cv_ptr->image.cols / 4, cv_ptr->image.rows / 4));
     if (numberOfFaces == 0)
         return;
